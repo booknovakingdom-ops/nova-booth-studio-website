@@ -7,6 +7,52 @@
 
   document.documentElement.classList.remove("no-js");
 
+  /* ---------- Shared form helpers ---------- */
+
+  // Stamp every form's timestamp field on load so the server can reject
+  // instant (bot) submissions. Uses ms since epoch.
+  Array.prototype.forEach.call(document.querySelectorAll("[data-form-time]"), function (node) {
+    node.value = String(Date.now());
+  });
+
+  function setSubmitting(formEl, busy) {
+    var button = formEl.querySelector("[data-submit]");
+    if (!button) return;
+    if (busy) {
+      button.dataset.label = button.dataset.label || button.textContent;
+      button.setAttribute("aria-busy", "true");
+      button.disabled = true;
+      button.textContent = "Sending…";
+    } else {
+      button.removeAttribute("aria-busy");
+      button.disabled = false;
+      if (button.dataset.label) button.textContent = button.dataset.label;
+    }
+  }
+
+  // POST a form to its action via fetch and resolve with a normalised result.
+  function deliverForm(formEl) {
+    var action = formEl.getAttribute("action") || "/form-handler.php";
+    var data = new FormData(formEl);
+    return fetch(action, {
+      method: "POST",
+      body: data,
+      headers: { Accept: "application/json" },
+      credentials: "same-origin"
+    })
+      .then(function (response) {
+        return response
+          .json()
+          .catch(function () { return {}; })
+          .then(function (json) {
+            return { ok: response.ok && json && json.ok === true, status: response.status, json: json || {} };
+          });
+      })
+      .catch(function () {
+        return { ok: false, status: 0, json: {} };
+      });
+  }
+
   /* ---------- Header scroll state ---------- */
   var header = document.querySelector("[data-header]");
   function onScroll() {
@@ -120,6 +166,7 @@
     var successPanel = document.getElementById("waitlist-success");
     var summaryList = document.getElementById("waitlist-summary");
     var alertBox = formEl.querySelector("[data-form-alert]");
+    var fallbackBox = formEl.querySelector("[data-form-fallback]");
     var copyButton = document.getElementById("waitlist-copy");
     var copyStatus = document.getElementById("waitlist-copy-status");
     var summaryText = "";
@@ -176,7 +223,30 @@
         return;
       }
       if (alertBox) alertBox.classList.remove("is-visible");
+      if (fallbackBox) fallbackBox.hidden = true;
 
+      // Only reveal success once the server confirms the email was sent.
+      setSubmitting(formEl, true);
+      deliverForm(formEl).then(function (result) {
+        if (result.ok) {
+          showSuccess();
+          return;
+        }
+        setSubmitting(formEl, false);
+        if (result.json && result.json.fields) {
+          Object.keys(result.json.fields).forEach(function (name) {
+            mark(name, result.json.fields[name]);
+          });
+        }
+        if (fallbackBox) {
+          fallbackBox.hidden = false;
+          fallbackBox.focus && fallbackBox.setAttribute("tabindex", "-1");
+          fallbackBox.scrollIntoView({ behavior: reducedMotion.matches ? "auto" : "smooth", block: "center" });
+        }
+      });
+    });
+
+    function showSuccess() {
       var entries = [];
       [["name", "Name"], ["email", "Email"], ["phone", "Phone"], ["event-date", "Event date"], ["message", "Notes"]].forEach(function (pair) {
         var v = value(pair[0]).trim();
@@ -213,7 +283,7 @@
           block: "start"
         });
       }
-    });
+    }
 
     formEl.addEventListener("input", function (event) {
       var name = event.target.name;
@@ -245,6 +315,7 @@
     var alertBox = formEl.querySelector("[data-form-alert]");
     var copyButton = document.getElementById("copy-summary");
     var copyStatus = document.getElementById("copy-status");
+    var fallbackBox = formEl.querySelector("[data-form-fallback]");
     var lastSummaryText = "";
 
     // Earliest selectable event date is today.
@@ -258,16 +329,6 @@
         "-" +
         String(today.getDate()).padStart(2, "0");
       dateInput.min = iso;
-    }
-
-    /* --- Submission handler (isolated) --------------------------------
-       No email service or backend is connected yet. This handler only
-       captures the enquiry in the browser and shows a confirmation with
-       a copyable summary plus the studio phone number. When a mail/API
-       endpoint is ready, replace the body of submitInquiry() below. */
-    function submitInquiry(data) {
-      void data; // Intentionally unused until a delivery endpoint exists.
-      return Promise.resolve({ delivered: false });
     }
 
     var validators = {
@@ -347,10 +408,27 @@
       }
 
       if (alertBox) alertBox.classList.remove("is-visible");
+      if (fallbackBox) fallbackBox.hidden = true;
 
+      // Only reveal the success screen once the server confirms delivery.
       var data = collectData();
-      submitInquiry(data).then(function () {
-        renderSuccess(data);
+      setSubmitting(formEl, true);
+      deliverForm(formEl).then(function (result) {
+        if (result.ok) {
+          renderSuccess(data);
+          return;
+        }
+        setSubmitting(formEl, false);
+        if (result.json && result.json.fields) {
+          Object.keys(result.json.fields).forEach(function (name) {
+            setError(name, result.json.fields[name]);
+          });
+        }
+        if (fallbackBox) {
+          fallbackBox.hidden = false;
+          fallbackBox.setAttribute("tabindex", "-1");
+          fallbackBox.scrollIntoView({ behavior: reducedMotion.matches ? "auto" : "smooth", block: "center" });
+        }
       });
     });
 

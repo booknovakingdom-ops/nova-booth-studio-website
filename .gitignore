@@ -1,0 +1,6 @@
+# Never commit real mail credentials — only the .sample template belongs in git.
+nova-mail-config.php
+
+# Local tooling / OS noise
+.DS_Store
+node_modules/

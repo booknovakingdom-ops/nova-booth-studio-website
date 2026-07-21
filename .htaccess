@@ -9,3 +9,20 @@ ErrorDocument 404 /404.html
   ExpiresByType image/svg+xml "access plus 30 days"
   ExpiresByType image/png "access plus 30 days"
 </IfModule>
+
+# --- Security: never serve mail credentials or PHP internals ---------------
+
+# Block the real mail config outright (belongs above public_html; this is a
+# defence-in-depth fallback in case it is ever placed in the web root).
+<FilesMatch "^nova-mail-config\.php$">
+  Require all denied
+</FilesMatch>
+
+# Hide the sample/template too — it's documentation, not a public endpoint.
+<FilesMatch "\.(sample\.php|dist|ini|log)$">
+  Require all denied
+</FilesMatch>
+
+# The PHP mail library and vendored PHPMailer are includes, not endpoints.
+# Only form-handler.php should be requested directly.
+RedirectMatch 404 ^/assets/php/(?!$).*

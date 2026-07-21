@@ -108,7 +108,13 @@
             </div>
           </div>
 
-          <form id="availability-form" class="availability-form" novalidate data-reveal>
+          <form id="availability-form" class="availability-form" action="/form-handler.php" method="post" novalidate data-reveal>
+            <input type="hidden" name="form_type" value="quote">
+            <input type="hidden" name="form_time" value="" data-form-time>
+            <div class="hp-field" aria-hidden="true">
+              <label for="company_url">Company website</label>
+              <input type="text" id="company_url" name="website" tabindex="-1" autocomplete="off">
+            </div>
             <div class="form-alert" data-form-alert role="alert"></div>
             <div class="form-grid">
               <div class="field">
@@ -230,9 +236,12 @@
                 <p class="field-error"></p>
               </div>
             </div>
+            <div class="form-fallback" data-form-fallback role="alert" hidden>
+              We couldn't send your request just now. Please email <a href="mailto:novaboothstudio@gmail.com">novaboothstudio@gmail.com</a> or call or text <a href="tel:9029900005">902-990-0005</a> and we'll take care of it right away.
+            </div>
             <div class="form-actions">
-              <button class="btn btn-gold btn-lg" type="submit">Check Availability</button>
-              <p class="form-note">Online delivery is still being connected — your request is prepared on this page, and calling or texting <a href="tel:9029900005">902-990-0005</a> is the fastest way to confirm a date today.</p>
+              <button class="btn btn-gold btn-lg" type="submit" data-submit>Check Availability</button>
+              <p class="form-note">We'll reply with availability and a clear quote. Prefer to talk now? Call or text <a href="tel:9029900005">902-990-0005</a>.</p>
             </div>
           </form>
 
@@ -240,8 +249,8 @@
             <div class="success-mark" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg>
             </div>
-            <h2>Your request is ready</h2>
-            <p>Here's a summary of everything you entered. Our online delivery isn't connected yet, so to get this to us today, copy the summary below and text or email it — or simply call <a href="tel:9029900005">902-990-0005</a> and we'll take it from there.</p>
+            <h2>Your request is on its way</h2>
+            <p>Thanks — we've received your details and we'll be in touch soon with availability and a clear quote. A copy of what you sent is below, and you're always welcome to call or text <a href="tel:9029900005">902-990-0005</a>.</p>
             <dl class="success-summary" id="success-summary"></dl>
             <div class="success-actions">
               <button class="btn btn-gold" type="button" id="copy-summary">Copy summary</button>
