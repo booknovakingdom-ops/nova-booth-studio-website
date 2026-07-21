@@ -282,7 +282,13 @@
           <h2 class="section-title" id="waitlist-title">Be first when the mirror <span class="gilt">arrives</span></h2>
           <p class="section-sub">Leave your details and we'll contact you when mirror bookings open. No spam — just the one message that matters.</p>
         </div>
-        <form id="waitlist-form" class="availability-form" novalidate data-reveal>
+        <form id="waitlist-form" class="availability-form" action="/form-handler.php" method="post" novalidate data-reveal>
+          <input type="hidden" name="form_type" value="waitlist">
+          <input type="hidden" name="form_time" value="" data-form-time>
+          <div class="hp-field" aria-hidden="true">
+            <label for="wl-company-url">Company website</label>
+            <input type="text" id="wl-company-url" name="website" tabindex="-1" autocomplete="off">
+          </div>
           <div class="form-alert" data-form-alert role="alert"></div>
           <div class="form-grid">
             <div class="field">
@@ -316,9 +322,12 @@
               <p class="field-error"></p>
             </div>
           </div>
+          <div class="form-fallback" data-form-fallback role="alert" hidden>
+            We couldn't add you to the waitlist just now. Please email <a href="mailto:novaboothstudio@gmail.com">novaboothstudio@gmail.com</a> or call or text <a href="tel:9029900005">902-990-0005</a> and mention the mirror waitlist.
+          </div>
           <div class="form-actions">
-            <button class="btn btn-gold btn-lg" type="submit">Join the Mirror Booth Waitlist</button>
-            <p class="form-note">Online delivery is still being connected — your details are prepared on this page, and calling or texting <a href="tel:9029900005">902-990-0005</a> reaches us instantly.</p>
+            <button class="btn btn-gold btn-lg" type="submit" data-submit>Join the Mirror Booth Waitlist</button>
+            <p class="form-note">We'll reach out the moment mirror bookings open. Prefer to talk? Call or text <a href="tel:9029900005">902-990-0005</a>.</p>
           </div>
         </form>
         <div class="form-success" id="waitlist-success" hidden>
@@ -326,7 +335,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg>
           </div>
           <h2>You're on the list</h2>
-          <p>Here's what you entered. Our online delivery isn't connected yet, so to make sure it reaches us today, copy the summary and text or email it — or call <a href="tel:9029900005">902-990-0005</a> and mention the mirror waitlist.</p>
+          <p>Thanks — we've got your details and we'll reach out the moment the mirror booth opens for bookings. A copy of what you sent is below, and you can always call or text <a href="tel:9029900005">902-990-0005</a>.</p>
           <dl class="success-summary" id="waitlist-summary"></dl>
           <div class="success-actions">
             <button class="btn btn-gold" type="button" id="waitlist-copy">Copy summary</button>
