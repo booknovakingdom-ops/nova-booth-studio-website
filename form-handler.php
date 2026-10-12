@@ -2,9 +2,9 @@
 /**
  * Nova Booth Studio — form submission endpoint.
  *
- * Handles both the Check Availability / Get a Quote form and the Mirror Booth
- * waitlist form. Returns JSON. Contains no secrets — SMTP settings come from
- * the environment or an out-of-web-root config file (see assets/php/mailer.php).
+ * Handles the Check Availability / Get a Quote form for the Mirror Photo Booth
+ * and 360 Video Booth. Returns JSON. Contains no secrets — SMTP settings come
+ * from the environment or an out-of-web-root config file (see assets/php/mailer.php).
  */
 
 declare(strict_types=1);
@@ -52,7 +52,7 @@ $get = static function (string $key) use ($post): string {
 };
 
 $formType = $get('form_type');
-if ($formType !== 'quote' && $formType !== 'waitlist') {
+if ($formType !== 'quote') {
     nova_respond(400, ['ok' => false, 'error' => 'Unknown form.']);
 }
 
@@ -97,19 +97,9 @@ $QUOTE_FIELDS = [
     'contact-method' => ['Preferred contact method', false, false],
 ];
 
-$WAITLIST_FIELDS = [
-    'name'       => ['Name', true, false],
-    'email'      => ['Email', true, false],
-    'phone'      => ['Phone', true, false],
-    'event-date' => ['Event date', false, false],
-    'message'    => ['Notes', false, true],
-];
-
-$spec    = $formType === 'quote' ? $QUOTE_FIELDS : $WAITLIST_FIELDS;
-$heading = $formType === 'quote' ? 'New Quote Request' : 'New Mirror Booth Waitlist Request';
-$subject = $formType === 'quote'
-    ? 'New Nova Booth Studio Quote Request'
-    : 'New Mirror Booth Waitlist Request';
+$spec    = $QUOTE_FIELDS;
+$heading = 'New Quote Request';
+$subject = 'New Nova Booth Studio Quote Request';
 
 // --- Validate + sanitise every field server-side -------------------------
 $errors = [];
@@ -196,7 +186,5 @@ if (!$ok) {
 
 nova_respond(200, [
     'ok'      => true,
-    'message' => $formType === 'quote'
-        ? 'Your request is on its way — we\'ll be in touch soon.'
-        : "You're on the list — we'll reach out when the mirror booth opens for bookings.",
+    'message' => 'Your request is on its way — we\'ll be in touch soon.',
 ]);
